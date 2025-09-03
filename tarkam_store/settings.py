@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-59-u7ul*mb&1%#tem9$*_4-2u+v5@ft4!s!#r114x%sg0m*sk1'
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "ahmad-yaqdhan-tarkamstore.pbp.cs.ui.ac.id"]
 
 PRODUCTION = os.getenv("PRODUCTION", "False").lower() == "true"
 
