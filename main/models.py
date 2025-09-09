@@ -3,7 +3,10 @@ from django.db import models
 
 class Product(models.Model):
     CATEGORIES = [
-        # Will add later
+        ("shoes", "Shoes"),
+        ("clothes", "Clothes"),
+        ("accessories", "Accessories"),
+        ("balls", "Balls"),
         ("other", "Other")
     ]
 
