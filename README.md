@@ -1,5 +1,5 @@
 # Tarkam Store
-Tautan Deployment: 
+Tautan Deployment: https://ahmad-yaqdhan-tarkamstore.pbp.cs.ui.ac.id/
 
 ## Soal 1
 Langkah-langkah yang saya lakukan adalah sebagai berikut
@@ -216,3 +216,22 @@ Tahap ini sudah dilakukan bersamaan dengan checklist 3, dimana kita sudah menamb
     Silahkan ganti ke username yang sesuai untuk akun SCELE anda.
 6. Ketika perintah yang terakhir dijalankan, seharusnya git menanyakan username dan password. Di sini, masukkan kredensial yang kita salin sebelumnya pada tahap 3.
 7. Setelah selesai push, program seharusnya sudah berhasil dideploy.
+
+## Soal 2
+Gambar bagan terdapat di file `Bagan Tugas 2 PBP.png`. Apabila README ini dibuka melalui preview markdown, maka seharusnya muncul di bawah ini:
+
+![Bagan Django](./Bagan%20Tugas%202%20PBP.png)
+
+## Soal 3
+Peran `settings.py` adalah untuk mendefinisikan beberapa variabel yang nantinya akan diimport oleh sistem django sebagai konfigurasi dari aplikasi yang akan dijalankan. Tentunya karena `settings.py` adalah file konfigurasi, maka file ini dijalankan terlebih dahulu sebelum bagian lain seperti routing dan views dijalankan.
+
+## Soal 4
+Migrasi database bekerja dengan membaca model yang dituliskan di tiap-tiap appp ada projek Django. Apabila terdapat perubahan dalam bentuk model, maka migrasi akan dilakukan. Fungsi dari migrasi sendiri kurang lebih mirip dengan fungsi Git, namun khusus untuk model data. Migrasi dilakukan agar perubahan terhadap model tercatat, sehingga apabila terjadi sesuatu yang tidak diinginkan dengan bentuk model yang baru maka bisa kita gunakan model yang lama.
+
+## Soal 5
+Menurut saya, alasan mengapa Django dijadikan permulaan pembelajaran pengembangan perangkat lunak adalah karena Django dibangun menggunakan bahasa Python. Bahasa Python sendiri memiliki keunggulan yaitu ramah pemula karena sintaksnya yang mudah dipahami serta ekosistemnya yang besar. Oleh karena sebab ini juga, bahasa Python adalah bahasa yang paling umum digunakan dalam  
+
+
+## Soal 6
+Tidak ada :)
+Tutorial 1 mudah untuk diikuti dan dipahami.
