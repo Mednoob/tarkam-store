@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
 <h1>{{ app_name }}</h1>
 
 <h4>Nama</h4>
@@ -11,3 +13,9 @@
 
 <h4>Message:</h4>
 <p>{{ message }}</p>
+
+<a href="{% url 'main:show_product_list' %}">
+    <button>See Product List</button>
+</a>
+
+{% endblock %}
