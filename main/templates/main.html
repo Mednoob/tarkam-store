@@ -18,4 +18,13 @@
     <button>See Product List</button>
 </a>
 
+<h3>User Info</h3>
+
+<h5>Username: {{ username }}</h5>
+<h5>Last Login: {{ last_login }}</h5>
+
+<a href="{% url 'main:logout' %}">
+    <button>Logout</button>
+</a>
+
 {% endblock %}

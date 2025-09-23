@@ -1,6 +1,11 @@
 # Tarkam Store
 Tautan Deployment: https://ahmad-yaqdhan-tarkamstore.pbp.cs.ui.ac.id/
 
+Daftar Isi:
+1. [Tugas Individu 2](#tugas-individu-2)
+2. [Tugas Individu 3](#tugas-individu-3)
+3. [Tugas Individu 4](#tugas-individu-4)
+
 # Tugas Individu 2
 ## Soal 1
 Langkah-langkah yang saya lakukan adalah sebagai berikut
@@ -561,3 +566,307 @@ File gambar: `docs/images/PostmanXMLByID.png`
 File gambar: `docs/images/PostmanJSONByID.png`
 
 ![Postman JSON by ID](./docs/images/PostmanJSONByID.png)
+
+# Tugas Individu 4
+
+## Soal 1: Apa itu Django `AuthenticationForm`? Jelaskan juga kelebihan dan kekurangannya.
+`AuthenticationForm` adalah sebuah model form autentikasi bawaan dari Django. Form ini berisi 2 field, yaitu username dan password.
+
+Kelebihan dari `AuthenticationForm` adalah bahwa tiap-tiap field sudah divalidasi oleh Django, jadi kita tidak perlu khawatir tentang isi username dan password. Kekurangannya adalah form ini kurang customizable dengan bagaimana cara Django berinteraksi dengan data dan form yang mereka miliki. Mereka tidak men-design kasus handling ketika ada field tambahan seperti captcha key, sehingga ketika kita menggunakan pengecekan built-in pasti ada hal yang tidak tercek oleh Django.
+
+## Soal 2: Apa perbedaan antara autentikasi dan otorisasi? Bagaimana Django mengimplementasikan kedua konsep tersebut?
+Autentikasi adalah proses dimana program atau web mengenali dan mengidentifikasikan kita sebagai pengguna. Pada Django, ini dilakukan dengan menggunakan `AuthenticationForm` untuk melakukan autentikasi berdasarkan username dan password pengguna.
+
+Otorisasi adalah proses dimana program atau web memberikan hak / izin untuk melakukan sesuatu sesuai dengan identitas yang didapat dari proses Autentikasi. Pada Django, ini bisa dilakukan dengan berbagai cara. Namun pada kasus program ini, kita gunakan salah satu cara otorisasi yaitu decorator `login_required`. Decorator ini akan mengecek terlebih dahulu request dari pengguna, apakah pengguna sudah login atau belum. Apabila sudah, maka pengguna memiliki otorisasi untuk melakukan request tersebut sehingga Django akan memproses request. Namun jika belum, maka Django tidak akan memproses request lebih lanjut.
+
+## Soal 3: Apa saja kelebihan dan kekurangan _session_ dan _cookies_ dalam konteks menyimpan _state_ di aplikasi web?
+1. Session
+    - Kelebihan: Menyimpan data hanya di server, sehingga lebih aman. Ukuran data yang bisa disimpan pun juga besar
+    - Kekurangan: Berakhir setelah browser ditutup ataupun ketika session timeout
+2. Cookie
+    - Kelebihan: Data login tersimpan di komputer user melalui browser yang digunakan, sehingga user dapat tetap terautentikasi ketika mereka membuka kembali browser.
+    - Kekurangan: Cookie dapat digunakan oleh penyerang untuk masuk ke dalam sistem sebagai pengguna lain
+
+## Soal 4: Apakah penggunaan _cookies_ aman secara _default_ dalam pengembangan web, atau apakah ada risiko potensial yang harus diwaspadai? Bagaimana Django menangani hal tersebut?
+Tentunya masih ada risiko potensial yang harus diwaspadai. Dari tugas individu 2, sudah dibahas mengenai CSRF. CSRF ini juga menjadi salah satu hal yang bisa terjadi karena sistem cookies pada web browser. Django menangani masalah ini dengan menambahkan CSRF token sebagai validasi tambahan ketika menerima permintaan perubahan data.
+
+## Soal 5: Jelaskan bagaimana cara kamu mengimplementasikan checklist di atas secara step-by-step (bukan hanya sekadar mengikuti tutorial).
+
+### Checklist 1: Mengimplementasikan fungsi registrasi, login, dan logout untuk memungkinkan pengguna mengakses aplikasi sebelumnya sesuai dengan status login/logoutnya.
+1. Saya menambahkan import-import berikut terlebih dahulu pada file `main/views.py`:
+    ```python
+    ...
+
+    from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+    from django.contrib.auth.decorators import login_required
+    from django.contrib.auth import login, logout
+    from django.contrib import messages
+
+    from django.http import HttpResponseRedirect
+    from django.urls import reverse
+
+    ...
+    ```
+
+2. Masih di file yang sama, saya membuat tiga request handler baru untuk registrasi, login, dan logout:
+    ```python
+    def register(request):
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your account has been successfully created")
+            return redirect("main:login")
+
+    context = { "form": form }
+    return render(request, "register.html", context)
+
+    def login_user(request):
+        if request.method == "POST":
+            form = AuthenticationForm(data=request.POST)
+
+            if form.is_valid():
+                user = form.get_user()
+                login(request, user)
+
+                response = HttpResponseRedirect(reverse("main:show_main"))
+
+                return response
+
+        else:
+            form = AuthenticationForm(request)
+
+        context = { "form": form }
+        return render(request, "login.html", context)
+
+    def logout_user(request):
+        logout(request)
+
+        response=HttpResponseRedirect(reverse("main:login"))
+
+        return response
+    ```
+
+3. Masih di file yang sama, saya ubah tiap-tiap fungsi request yang menggunakan render agar membutuhkan login untuk bisa diakses:
+    ```python
+    @login_required(login_url="/store/login")
+    def show_main(request):
+        ...
+
+    @login_required(login_url="/store/login")
+    def show_product_list(request):
+        ...
+
+    @login_required(login_url="/store/login")
+    def create_product(request):
+        ...
+
+    @login_required(login_url="/store/login")
+    def show_product(request):
+        ...
+    ```
+
+4. Saya buat template untuk fungsi registrasi dan login:
+    - `main/templates/register.html`
+        ```html
+        {% extends "base.html" %}
+
+        {% block meta %}
+        <title>Register</title>
+        {% endblock meta %}
+
+        {% block content %}
+
+        <div>
+        <h1>Register</h1>
+
+        <form method="POST">
+            {% csrf_token %}
+            <table>
+            {{ form.as_table }}
+            <tr>
+                <td></td>
+                <td><input type="submit" name="submit" value="Daftar" /></td>
+            </tr>
+            </table>
+        </form>
+
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        </div>
+
+        {% endblock content %}
+        ```
+    - `main/templates/login.html`
+        ```html
+        {% extends 'base.html' %}
+
+        {% block meta %}
+        <title>Login</title>
+        {% endblock meta %}
+
+        {% block content %}
+        <div class="login">
+        <h1>Login</h1>
+
+        <form method="POST" action="">
+            {% csrf_token %}
+            <table>
+            {{ form.as_table }}
+            <tr>
+                <td></td>
+                <td><input class="btn login_btn" type="submit" value="Login" /></td>
+            </tr>
+            </table>
+        </form>
+
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %} Don't have an account yet?
+        <a href="{% url 'main:register' %}">Register Now</a>
+        </div>
+
+        {% endblock content %}
+        ```
+5. Terakhir, saya menambahkan fungsi-fungsi request handler yang baru saja saya buat ke `main/urls.py`:
+    ```python
+    ...
+    from main.views import show_main, show_product_list, create_product, show_product, show_xml, show_json, show_xml_by_id, show_json_by_id, register, login_user, logout_user
+
+    ...
+
+    urlpatterns = [
+        ...
+
+        path("register/", register, name="register"),
+        path("login/", login_user, name="login"),
+        path("logout/", logout_user, name="logout")
+    ]
+    ```
+
+### Checklist 2: Membuat **dua** (2) akun pengguna dengan masing-masing **tiga** (3) _dummy data_ menggunakan model yang telah dibuat sebelumnya untuk setiap akun **di lokal**.
+Saya lakukan ini dengan membuat dua akun melalui halaman register yang sudah saya buat sebelumnya. Setelah membuat kedua akun tersebut, saya login dan kemudian membuat tiga produk di masing-masing akun tersebut.
+
+### Checklist 3: Menghubungkan model `Product` dengan `User`.
+1. Saya menambahkan `User` ke model `Product` di atribut `user`:
+    ```python
+    ...
+    from django.contrib.auth.models import User
+
+    class Product(models.Model):
+        ...
+        user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+        ...
+    ```
+2. Saya membuat dan melakukan migration
+    ```
+    python manage.py makemigrations main
+    python manage.py migrate
+    ```
+3. Saya memodifikasi fungsi `create_product` pada `main/views.py` sehingga user yang membuat product dimasukkan ke product sebagai atribut `user`:
+    ```python
+    @login_required(login_url="/store/login")
+    def create_product(request):
+        form = ProductForm(request.POST or None)
+
+        if form.is_valid() and request.method == "POST":
+            product_entry = form.save(commit=False)
+            product_entry.user = request.user
+            product_entry.save()
+
+            return redirect("main:show_main")
+
+        context = {"form": form}
+        return render(request, "create_product.html", context)
+    ```
+4. Saya menambahkan data mengenai penjual pada data produk yang tampil di `main/templates/product_details.html` dan `main/templates/product_list.html`:
+    ```html
+    ...
+
+    <p><b>{{ product.get_category_display }}</b>
+        {% if product.is_featured %} | <b>Featured</b>{% endif %}
+        | <b>Seller: {% if product.user %}{{product.user.username}}{% else %}???{%endif%}</b>
+    </p>
+
+    ...
+    ```
+
+### Checklist 4: Menampilkan detail informasi pengguna yang sedang _logged in_ seperti _username_ dan menerapkan _cookies_ seperti `last_login` pada halaman utama aplikasi.
+1. Saya memodifikasi fungsi `show_main`, `login`, `logout` pada `main/views.py` agar menggunakan cookie `last_login` dan dapat menampilkan username`:
+    ```python
+    ...
+    import datetime
+
+    ...
+
+    @login_required(login_url="/store/login")
+    def show_main(request: HttpRequest):
+        context = {
+            "app_name": "Tarkam Store",
+            "name": "Ahmad Yaqdhan",
+            "class": "PBP A",
+            "npm": 2406399081,
+            "message": "Coming soon!",
+            "last_login": request.COOKIES.get("last_login", "Never"),
+            "username": request.user.username
+        }
+
+        return render(request, "main.html", context)
+
+    ...
+
+    def login_user(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            response = HttpResponseRedirect(reverse("main:show_main"))
+            response.set_cookie("last_login", str(datetime.datetime.now()))
+
+            return response
+
+    else:
+        form = AuthenticationForm(request)
+
+    context = { "form": form }
+    return render(request, "login.html", context)
+
+    def logout_user(request):
+        logout(request)
+
+        response=HttpResponseRedirect(reverse("main:login"))
+        response.delete_cookie("last_login")
+
+        return response
+    ```
+
+2. Saya taruh `last_login` dan `username` (yang sudah saya tambahkan tadi ke context `show_main`) di `main/templates/main.html`:
+    ```html
+    ...
+
+    <a href="{% url 'main:show_product_list' %}">
+        <button>See Product List</button>
+    </a>
+
+    <h3>User Info</h3>
+
+    <h5>Username: {{ username }}</h5>
+    <h5>Last Login: {{ last_login }}</h5>
+
+    ...
+    ```
+
