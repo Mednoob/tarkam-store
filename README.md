@@ -5,6 +5,7 @@ Daftar Isi:
 1. [Tugas Individu 2](#tugas-individu-2)
 2. [Tugas Individu 3](#tugas-individu-3)
 3. [Tugas Individu 4](#tugas-individu-4)
+4. [Tugas Individu 5](#tugas-individu-5)
 
 # Tugas Individu 2
 ## Soal 1
@@ -870,3 +871,100 @@ Saya lakukan ini dengan membuat dua akun melalui halaman register yang sudah say
     ...
     ```
 
+# Tugas Individu 5
+## Soal 1: Jika terdapat beberapa CSS selector untuk suatu elemen HTML, jelaskan urutan prioritas pengambilan CSS selector tersebut!
+Browser akan memilih style untuk atribut pada suatu elemen tertentu dengan urutan sebagai berikut:
+1. Inline CSS
+2. ID selector
+3. Class selector
+4. Tag selector
+
+## Soal 2: Mengapa _responsive design_ menjadi konsep yang penting dalam pengembangan aplikasi _web_? Berikan contoh aplikasi yang sudah dan belum menerapkan _responsive design_, serta jelaskan mengapa!
+Responsive design penting sebagai konsep pengembangan aplikasi web karena aplikasi akan diakses tidak hanya dari desktop, tetapi juga dengan perangkat dengan layar kecil seperti perangkat mobile. 
+
+Contoh aplikasi yang belum menerapkan responsive design adalah aplikasi yang kita buat sebelum Tugas Individu 5. Aplikasi tidak menghandle styling ketika aplikasi dibuka pada layar lebih kecil.
+
+Contoh aplikasi yang sudah menerapkan responsive design adalah aplikasi yang baru saja kita tambah styling responsive. Selain dari itu, SCELE juga salah satu contoh aplikasi yang responsive.
+
+## Soal 3: Jelaskan perbedaan antara _margin_, _border_, dan _padding_, serta cara untuk mengimplementasikan ketiga hal tersebut!
+Margin adalah jarak yang kita berikan pada bagian luar dari elemen sehingga elemen menjauh dari elemen lain di sekitarnya.
+
+Border adalah garis yang bisa kita tambah sebagai pembatas pada ujung-ujung elemen.
+
+Padding adalah jarak yang kita berikan pada bagian dalam dari elemen sehingga anak dari elemen tersebut menjauh ke dalam elemen.
+
+## Soal 4: Jelaskan konsep _flex box_ dan _grid layout_ beserta kegunaannya!
+Flexbox adalah konsep penataan atau peletakan elemen-elemen dalam baris atau kolom. Flexbox hanya bisa menerapkan salah satu dari peletakan baris atau kolom saja.
+
+Grid layout adalah konsep penataan atau peletakan elemen-elemen dalam bentuk 2 dimensi. Penataan pada grid layout ini mirip dengan sebuah tabel dimana terdapat kolom dan baris, serta tiap-tiap selnya adalah anak dari elemen tersebut.
+
+## Soal 5: Jelaskan bagaimana cara kamu mengimplementasikan _checklist_ di atas secara _step-by-step_ (bukan hanya sekadar mengikuti tutorial)!
+### Checklist 1: Implementasikan fungsi untuk menghapus dan mengedit product.
+1. Saya buat terlebih dahulu fungsi views yang akan meng-handle request edit dan hapus product di file `main/views.py`:
+    ```python
+    ...
+
+    @login_required(login_url="/store/login")
+    def edit_product(request: HttpRequest, id):
+        product = get_object_or_404(Product, pk=id)
+        if not product.user or product.user.pk != request.user.pk:
+            return HttpResponseRedirect(reverse("main:show_product_list"))
+
+        form = ProductForm(request.POST or None, instance=product)
+        if form.is_valid() and request.method == "POST":
+            form.save()
+            return redirect("main:show_product_list")
+
+        context = {
+            "form": form
+        }
+        return render(request, "edit_product.html", context)
+
+    @login_required(login_url="/store/login")
+    def delete_product(request, id):
+        product = get_object_or_404(Product, pk=id)
+        product.delete()
+        return HttpResponseRedirect(reverse("main:show_product_list"))
+
+    ...
+    ```
+
+2. Saya menambahkan fungsi yang sudah saya buat ke `main/urls.py` agar dapat dimetakan ke suatu path yang nantinya bisa direquest oleh user:
+    ```python
+    ...
+    from main.views import show_main, show_product_list, create_product, show_product, show_xml, show_json, show_xml_by_id, show_json_by_id, register, login_user, logout_user, edit_product, delete_product
+
+    ...
+
+    urlpatterns = [
+        ...
+        path("products/<uuid:id>/edit/", edit_product, name="edit_product"),
+        path("products/<uuid:id>/delete/", delete_product, name="delete_product")
+    ]
+    ```
+3. Saya membuat file `edit_product.html` yang digunakan untuk merender form edit product
+
+### Checklist 2: Kustomisasi desain pada template HTML yang telah dibuat pada tugas-tugas sebelumnya menggunakan CSS atau CSS framework
+1. Saya menambahkan handler static file terlebih dahulu pada file `tarkam_store/settings.py`:
+    ```python
+    ...
+
+    MIDDLEWARE = [
+        'django.middleware.security.SecurityMiddleware',
+        'whitenoise.middleware.WhiteNoiseMiddleware',
+        ...
+    ]
+
+    ...
+
+    STATIC_URL = '/static/'
+    if DEBUG:
+        STATICFILES_DIRS = [
+            BASE_DIR / 'static'
+        ]
+    else:
+        STATIC_ROOT = BASE_DIR / 'static'
+2. Saya menambahkan file `static/css/global.css` sebagai styling yang akan digunakan oleh aplikasi dan file `static/image/no-product.png` sebagai placeholder gambar untuk kasus ketika tidak ada product yang sudah dibuat.
+3. Saya membuat navbar di `templates/navbar.html`. Navbar ini akan dipakai oleh homepage dan halaman product list.
+4. Saya membuat card untuk product di `main/templates/product_card.html`. Card dibuat dalam file terpisah agar pengelolaan mudah dan juga agar bisa digunakan ulang di elemen lain.
+5. Saya menambahkan styling pada tiap-tiap halaman yang sudah saya buat.

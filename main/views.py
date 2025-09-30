@@ -17,13 +17,8 @@ from main.forms import ProductForm
 @login_required(login_url="/store/login")
 def show_main(request: HttpRequest):
     context = {
-        "app_name": "Tarkam Store",
-        "name": "Ahmad Yaqdhan",
-        "class": "PBP A",
-        "npm": 2406399081,
-        "message": "Coming soon!",
-        "last_login": request.COOKIES.get("last_login", "Never"),
-        "username": request.user.username
+        "user": request.user,
+        "last_login": request.COOKIES.get("last_login", "Never")
     }
 
     return render(request, "main.html", context)
@@ -37,7 +32,8 @@ def show_product_list(request):
         product_list = Product.objects.filter(user=request.user)
 
     context = {
-        "product_list": product_list
+        "product_list": product_list,
+        "last_login": request.COOKIES.get("last_login", "Never")
     }
 
     return render(request, "product_list.html", context)
@@ -51,7 +47,7 @@ def create_product(request):
         product_entry.user = request.user
         product_entry.save()
 
-        return redirect("main:show_main")
+        return redirect("main:show_product_list")
 
     context = {"form": form}
     return render(request, "create_product.html", context)
@@ -64,6 +60,28 @@ def show_product(request, id):
         "product": product
     }
     return render(request, "product_details.html", context)
+
+@login_required(login_url="/store/login")
+def edit_product(request: HttpRequest, id):
+    product = get_object_or_404(Product, pk=id)
+    if not product.user or product.user.pk != request.user.pk:
+        return HttpResponseRedirect(reverse("main:show_product_list"))
+
+    form = ProductForm(request.POST or None, instance=product)
+    if form.is_valid() and request.method == "POST":
+        form.save()
+        return redirect("main:show_product_list")
+
+    context = {
+        "form": form
+    }
+    return render(request, "edit_product.html", context)
+
+@login_required(login_url="/store/login")
+def delete_product(request, id):
+    product = get_object_or_404(Product, pk=id)
+    product.delete()
+    return HttpResponseRedirect(reverse("main:show_product_list"))
 
 def show_xml(request):
     products = Product.objects.all()
