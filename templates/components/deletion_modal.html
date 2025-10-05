@@ -1,0 +1,60 @@
+<!-- Modal -->
+<div id="deletionModal" class="hidden fixed inset-0 z-50 w-full items-center justify-center bg-gray-800 bg-opacity-50">
+    <div id="deletionModalContent" class="bg-white rounded-lg shadow-lg w-5/6 sm:w-3/5 md:w-1/2 lg:w-2/5 xl:w-1/3 max-h-screen overflow-y-auto">
+        <div class="flex flex-col items-center p-4 border-b">
+            <h3 id="deletionModalHeading" class="text-xl font-semibold text-gray-900">
+                Are you sure?
+            </h3>
+            <p id="productModalDesc" class="text-sm text-gray-600 mt-1">Deleted product cannot be recovered.</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 p-6 border-t border-gray-200 rounded-b">
+            <button class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors text-center" onclick="hideDeletionModal()">Cancel</button>
+            <button class="flex-1 bg-red-600 text-white px-6 py-3 rounded-md font-medium hover:bg-red-700 transition-colors" onclick="deleteProduct()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const DELETE_BASE_ENDPOINT = "{% url 'main:delete_product_ajax' '00000000-0000-0000-0000-000000000000' %}";
+
+    const deletionModal = document.getElementById("deletionModal");
+    const deletionModalContent = document.getElementById("deletionModalContent");
+
+    let deletionId = null;
+
+    function showDeletionModal(data) {
+        deletionId = data.id;
+
+        deletionModal.classList.remove('hidden');
+        deletionModal.classList.add('flex');
+        setTimeout(() => {
+            deletionModalContent.classList.remove('opacity-0', 'scale-95');
+            deletionModalContent.classList.add('opacity-100', 'scale-100');
+        }, 50); 
+    }
+
+    function hideDeletionModal() {
+        deletionModalContent.classList.remove('opacity-100', 'scale-100');
+        deletionModalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+            deletionModal.classList.add('hidden');
+            deletionModal.classList.remove('flex');
+        }, 150);
+    }
+
+    async function deleteProduct() {
+        const deleteURL = DELETE_BASE_ENDPOINT.replace("00000000-0000-0000-0000-000000000000", deletionId);
+
+        await fetch(deleteURL, {
+            method: "POST"
+        });
+
+        hideDeletionModal();
+
+        showToast("Product deleted successfully!", "", "success");
+        document.dispatchEvent(new CustomEvent("productDeleted"));
+        return false;
+    }
+</script>

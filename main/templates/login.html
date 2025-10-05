@@ -10,84 +10,70 @@
     <div class="max-w-md w-full">
         <div class="bg-white rounded-lg border border-gray-200 p-6 sm:p-8 form-style">
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2" onclick="showToast('Logged in successfully!', '', 'success', 99999)">Sign In</h1>
                 <p class="text-gray-600">Welcome to Tarkam Store</p>
             </div>
 
-            {% if form.non_field_errors %}
-                <div class="mb-6">
-                    {% for error in form.non_field_errors %}
-                        <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700">
-                            {{ error }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            <div class="relative">
+                <!-- Form Errors Display -->
+                <div id="non-field-errors" class="mb-6 hidden"></div>
+                <div id="field-errors" class="mb-6 hidden"></div>
 
-            {% if form.errors %}
-                <div class="mb-6">
-                    {% for field, errors in form.errors.items %}
-                        {% if field != '__all__' %}
-                            {% for error in errors %}
-                                <div class="px-4 py-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-700 mb-2">
-                                    <strong>{{ field|title }}:</strong> {{ error }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            <form method="POST" action="" class="space-y-6">
-                {% csrf_token %}
-
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 transition-colors"
-                        placeholder="Enter your username"/>
-                </div>
-
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 transition-colors"
-                        placeholder="Enter your password">
-                </div>
-
-                <button
-                    type="submit"
-                    class="w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md hover:bg-green-700 transition-colors">
-                    Sign In
-                </button>
-            </form>
-
-            {% if messages %}
-                <div class="mt-6">
-                    {% for message in messages %}
-                        <div class="
-                            px-4 py-3 rounded-md text-sm border
-                            {% if message.tags == 'success' %}
-                                bg-green-50 border-green-200 text-green-700
-                            {% elif message.tags == 'error' %}
-                                bg-red-50 border-red-200 text-red-700
-                            {% else %}
-                                bg-gray-50 border-gray-200 text-gray-700
-                            {% endif %}
-                        ">
-                        {{ message }}
+                <div id="overlays" class="absolute hidden z-50 inset-0 w-full h-full">
+                    <div id="loading-screen" class="w-full h-full hidden flex justify-center items-center gap-3 bg-gray-800 opacity-80">
+                        <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                        <p class="text-gray-400">Logging in...</p>
                     </div>
-                    {% endfor %}
+
+                    <div id="logged-in-screen" class="w-full h-full hidden flex justify-center items-center bg-white">
+                        <div class="flex flex-col items-center gap-3 text-center">
+                            <p class="font-bold text-lg text-green-600">
+                                Logged In Successfully
+                            </p>
+                            <p>You'll be redirected in a moment...</p>
+                            <p class="mt-4 text-xs">You can click the button below to redirect immediately</p>
+                            <button
+                                onclick="redirect()"
+                                class="w-full text-green-800 border border-green-800 font-medium py-1 px-4 hover:bg-green-800 hover:text-white focus:outline-none transition duration-200">
+                                Redirect Now
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            {% endif %}
+
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input
+                            id="username"
+                            name="username"
+                            type="text"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 transition-colors"
+                            placeholder="Enter your username"/>
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:border-green-500 transition-colors"
+                            placeholder="Enter your password">
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="w-full bg-green-600 text-white font-medium py-3 px-4 rounded-md hover:bg-green-700 transition-colors">
+                        Sign In
+                    </button>
+                </form>
+            </div>
 
             <div class="mt-6 text-center pt-6 border-t border-gray-200">
                 <p class="text-gray-500 text-sm">
@@ -100,5 +86,94 @@
         </div>
     </div>
 </div>
+
+<script>
+    const LOGIN_ENDPOINT = "{% url 'main:login' %}";
+    const HOMEPAGE = "{% url 'main:show_main' %}";
+
+    const loginForm = document.getElementById("login-form");
+    const nonFieldErrors = document.getElementById("non-field-errors");
+    const fieldErrors = document.getElementById("field-errors");
+
+    const overlays = document.getElementById("overlays");
+    const loadingScreen = document.getElementById("loading-screen");
+    const loggedInScreen = document.getElementById("logged-in-screen");
+
+    function redirect() {
+        window.location.href = HOMEPAGE;
+    }
+
+    function renderErrors(errors) {
+        nonFieldErrors.innerHTML = "";
+        fieldErrors.innerHTML = "";
+
+        nonFieldErrors.classList.add("hidden");
+        fieldErrors.classList.add("hidden");
+
+        for (const errorMessage of errors.non_field_errors) {
+            const divElement = document.createElement("div");
+            divElement.className = "px-4 py-3 rounded text-sm border bg-red-50 border-red-200 text-red-700";
+            divElement.innerText = errorMessage;
+
+            nonFieldErrors.append(divElement);
+            nonFieldErrors.classList.remove("hidden");
+        }
+
+        for (const errorData of errors.field_errors) {
+            const divElement = document.createElement("div");
+            divElement.className = "px-4 py-3 rounded text-sm border bg-red-50 border-red-200 text-red-700 mb-2";
+            divElement.innerHTML = `<strong>${errorData.field}:</strong> ${errorData.error}`;
+
+            fieldErrors.append(divElement);
+            fieldErrors.classList.remove("hidden");
+        }
+    }
+
+    function showScreen({ showLoading=false, showLoggedIn=false }) {
+        overlays.classList.toggle("hidden", !showLoading && !showLoggedIn);
+        loadingScreen.classList.toggle("hidden", !showLoading);
+        loggedInScreen.classList.toggle("hidden", !showLoggedIn);
+    }
+
+    async function login() {
+        try {
+            const response = await fetch(LOGIN_ENDPOINT, {
+                method: "POST",
+                headers: { "Accept": "application/json" },
+                body: new FormData(loginForm)
+            });
+
+            if (!response.ok) {
+                try {
+                    const errors = await response.json();
+                    renderErrors(errors);
+                } catch (error) {
+                    throw new Error("Failed to login");
+                }
+
+                showScreen({});
+                showToast("Failed to Login", "There are some field/non-field errors.", "error", 5000);
+                return;
+            }
+
+            showScreen({ showLoggedIn: true });
+            showToast("Logged in successfully!", "", "success");
+
+            setTimeout(() => {
+                redirect();
+            }, 5000);
+        } catch (error) {
+            showScreen({});
+            showToast("An error occured!", error.toString(), "error", 5000);
+        }
+    }
+
+    loginForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        showScreen({ showLoading: true });
+        login();
+    });
+</script>
 
 {% endblock content %}

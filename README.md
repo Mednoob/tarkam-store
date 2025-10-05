@@ -968,3 +968,21 @@ Grid layout adalah konsep penataan atau peletakan elemen-elemen dalam bentuk 2 d
 3. Saya membuat navbar di `templates/navbar.html`. Navbar ini akan dipakai oleh homepage dan halaman product list.
 4. Saya membuat card untuk product di `main/templates/product_card.html`. Card dibuat dalam file terpisah agar pengelolaan mudah dan juga agar bisa digunakan ulang di elemen lain.
 5. Saya menambahkan styling pada tiap-tiap halaman yang sudah saya buat.
+
+# Tugas Individu 6
+## Soal 1: Apa perbedaan antara synchronous request dan asynchronous request?
+Synchronous request adalah request yang dilakukan secara sinkronus. Maksud dari sinkronus di sini adalah client tidak melakukan hal lain selain dari request yang sedang dikerjakan.
+
+Asynchronous request adalah kebalikan dari synchronous request. Request dilakukan secara asinkronus, dimana request dan proses yang menunggunya tidak mengganggu kerja lain dari client.
+
+## Soal 2: Bagaimana AJAX bekerja di Django (alur request–response)?
+Client akan mengirim sebuah asynchronous request menggunakan `fetch` ataupun `XMLHttpRequest`. Server django akan menerima request tersebut, kemudian melakukan pemrosesan sesuai dengan bagaimana seharusnya. Setelah pemrosesan selesai, server akan merangkai dan memberikan response sebagai hasil dari request client. Client akan menerima response tersebut dan membaca isinya. Isi dari response inilah yang digunakan oleh client sebagai data yang akan ditampilkan kepada user.
+
+## Soal 3: Apa keuntungan menggunakan AJAX dibandingkan render biasa di Django?
+Keuntungan dari menggunakan AJAX adalah laman tidak perlu selalu diload ulang ketika laman perlu mengupdate data yang akan ditampilkan. Dengan menggunakan AJAX, laman hanya akan meminta data terbaru saja dari server. Dengan pendekatan ini, transfer data yang dilakukan antara client dan server pun juga lebih ringan.
+
+## Soal 4: Bagaimana cara memastikan keamanan saat menggunakan AJAX untuk fitur Login dan Register di Django?
+Salah satu tahapan untuk memastikan keamanan adalah dengan melakukan validasi input. Kita tidak ingin agar pengguna memiliki password yang mudah untuk diretas. Setelah itu, diperlukan hashing pada password pengguna. Hal ini dilakukan agar apabila server diserang dan pengyerang mendapatkan akses ke data, maka password pengguna tidak bisa langsung diketahui oleh penyerang. Untuk melakukan ini, bisa kita buat model User sendiri atau bisa juga dengan menggunakan objek User bawaan Django yang sudah mengimplementasikan password hashing.
+
+# Soal 5: Bagaimana AJAX mempengaruhi pengalaman pengguna (User Experience) pada website?
+Ketika website belum menggunakan AJAX, website perlu reload ulang untuk mendapatkan data terbaru. Load ulang ini membuat imersi / fokus pengguna terganggu. Di sinilah AJAX berperan penting, dimana tiap data bisa disimpan dan diambil tanpa reload ulang page. Sehingga, pengguna masih bisa berinteraksi dengan data website tanpa kehilangan atensi dan fokus pada laman.
