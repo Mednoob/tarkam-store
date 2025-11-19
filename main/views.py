@@ -16,6 +16,11 @@ from django.urls import reverse
 
 from main.models import Product
 
+import json
+from django.utils.html import strip_tags
+
+import requests
+
 @login_required(login_url="/store/login")
 def show_main(request: HttpRequest):
     context = {
@@ -238,3 +243,75 @@ def logout_ajax(request):
     response.delete_cookie("last_login")
 
     return response
+
+@csrf_exempt
+def create_product_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        name = strip_tags(data.get('name', ''))
+        price = data.get('price', 0)
+        description = strip_tags(data.get('description', ''))
+        category = strip_tags(data.get('category', ''))
+        thumbnail = strip_tags(data.get('thumbnail', ''))
+        is_featured = data.get('is_featured', False)
+        user = request.user
+
+        new_product = Product(
+            name=name,
+            price=price,
+            description=description,
+            category=category,
+            thumbnail=thumbnail,
+            is_featured=is_featured,
+            user=user
+        )
+        new_product.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+
+def proxy_image(request):
+    image_url = request.GET.get('url')
+    if not image_url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Fetch image from external source
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Return the image with proper content type
+        return HttpResponse(
+            response.content,
+            content_type=response.headers.get('Content-Type', 'image/jpeg')
+        )
+    except requests.RequestException as e:
+        return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+
+@csrf_exempt
+def get_products_flutter(request):
+    if request.method == 'GET':
+        products = Product.objects.all()
+        data = [
+            {
+                "id": str(product.id),
+                "name": product.name,
+                "price": product.price,
+                "description": product.description,
+                "thumbnail": product.thumbnail,
+                "category": product.category,
+                "is_featured": product.is_featured,
+                "user_id": product.user_id
+            }
+            for product in products
+        ]
+
+        filter = request.GET.get('filter', 'all')
+        if filter != 'all':
+            user_id = request.user.id
+            data = [product for product in data if product['user_id'] == user_id]
+
+        return JsonResponse(data, safe=False, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
